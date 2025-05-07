@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/random_trip?useSSL=false&serverTimezone=Asia/Seoul
+    username: root               # 또는 random_user
+    password: whas556812@       # root 또는 random_user의 비밀번호
+  jpa:
+    hibernate:
+      ddl-auto: update           # 개발용: 자동 테이블 생성/업데이트
+    show-sql: true               # 콘솔에 실행 쿼리 출력
