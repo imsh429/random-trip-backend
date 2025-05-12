@@ -8,6 +8,13 @@ spring:
       ddl-auto: update           # 개발용: 자동 테이블 생성/업데이트
     show-sql: true               # 콘솔에 실행 쿼리 출력
 
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+
 server:
   port: 8080
 
