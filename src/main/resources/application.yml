@@ -7,3 +7,15 @@ spring:
     hibernate:
       ddl-auto: update           # 개발용: 자동 테이블 생성/업데이트
     show-sql: true               # 콘솔에 실행 쿼리 출력
+
+server:
+  port: 8080
+
+jwt:
+  secret: mysupersecureandlongenoughjwtsecretkey1234567890
+
+kakao:
+  client-id: ee981479b8571072d73c73fc2ca435b9
+  redirect-uri: http://localhost:8080/auth/kakao/callback
+  token-uri: https://kauth.kakao.com/oauth/token
+  user-info-uri: https://kapi.kakao.com/v2/user/me
