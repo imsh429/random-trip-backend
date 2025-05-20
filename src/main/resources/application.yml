@@ -1,28 +1,28 @@
+server:
+  port: 8080
+
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/random_trip?useSSL=false&serverTimezone=Asia/Seoul
-    username: root               # 또는 random_user
-    password: whas556812@       # root 또는 random_user의 비밀번호
+    username: root
+    password: whas556812@
   jpa:
     hibernate:
-      ddl-auto: update           # 개발용: 자동 테이블 생성/업데이트
-    show-sql: true               # 콘솔에 실행 쿼리 출력
+      ddl-auto: update
+    show-sql: true
 
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
-    operationsSorter: method
-
-server:
-  port: 8080
+    operations-sorter: method
 
 jwt:
   secret: mysupersecureandlongenoughjwtsecretkey1234567890
 
 kakao:
   client-id: ee981479b8571072d73c73fc2ca435b9
-  redirect-uri: http://localhost:8080/auth/kakao/callback
+  redirect-uri: http://localhost:5173/oauth/callback/kakao
   token-uri: https://kauth.kakao.com/oauth/token
   user-info-uri: https://kapi.kakao.com/v2/user/me

@@ -1,3 +1,4 @@
+//인증
 package com.randomtrip.backend.config;
 
 import com.randomtrip.backend.util.JwtProvider;
@@ -28,7 +29,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain)
             throws ServletException, IOException {
-
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/oauth")) {
+            // 🔓 /oauth로 시작하는 요청은 JWT 인증 검사 없이 통과
+            filterChain.doFilter(request, response);
+            return;
+        }
         String token = resolveToken(request);
         if (token != null && jwtProvider.validateToken(token)) {
             Long userId = jwtProvider.getUserId(token);

@@ -1,4 +1,4 @@
-// 외부 요청 진입점 => 내부서비스(kakaoauthservice) 호출
+// (사용자의 http요청)api 요청 처리 (rest endpoint)
 // 로그인 요청 처리
 package com.randomtrip.backend.controller;
 
@@ -14,28 +14,40 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/oauth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     private final KakaoAuthService kakaoAuthService;
     private final UserService userService;
     private final JwtProvider jwtProvider;
 
-    @GetMapping("/kakao/callback")
+    @GetMapping("callback/kakao")
     public ResponseEntity<?> kakaoCallback(@RequestParam String code) {
-        KakaoUserInfo userInfo = kakaoAuthService.getUserInfo(code);
+        try {
+            // 1. 사용자 정보 조회
+            KakaoUserInfo userInfo = kakaoAuthService.getUserInfo(code);
 
-        // 사용자 저장 or 조회
-        User user = userService.findOrCreateUser(userInfo);
+            // 2. DB에서 유저 생성 or 조회
+            User user = userService.findOrCreateUser(userInfo);
 
-        // JWT 발급
-        String accessToken = jwtProvider.createAccessToken(user.getId());
-        String refreshToken = jwtProvider.createRefreshToken(user.getId());
+            // 3. JWT 발급
+            String accessToken = jwtProvider.createAccessToken(user.getId());
+            String refreshToken = jwtProvider.createRefreshToken(user.getId());
 
-        return ResponseEntity.ok(Map.of(
-                "accessToken", accessToken,
-                "refreshToken", refreshToken,
-                "nickname", user.getNickname()));
+            // 4. JSON으로 성공 응답
+            return ResponseEntity.ok(Map.of(
+                    "accessToken", accessToken,
+                    "refreshToken", refreshToken,
+                    "nickname", user.getNickname()));
+
+        } catch (Exception e) {
+            // 5. 오류 발생 시 JSON 형태로 실패 응답
+            return ResponseEntity
+                    .status(401)
+                    .body(Map.of("error", "login_failed", "message", e.getMessage()));
+        }
     }
+
 }

@@ -1,4 +1,4 @@
-// db에 매핑되는 객체 
+// db 테이블 매핑
 // 사용자 entitiy
 package com.randomtrip.backend.entity;
 

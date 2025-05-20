@@ -1,5 +1,5 @@
 // kakao 사용자 정보 dto
-// dto : 외부로 데이터 주고받을 때 구조화 (추출)
+// dto : 외부 데이터 전달용 구조체
 package com.randomtrip.backend.dto;
 
 import lombok.Data;

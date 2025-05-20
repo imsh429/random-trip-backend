@@ -1,6 +1,6 @@
 // 컨트롤러로부터 요청 받음 -> 실제 로직 수행
 // (db조회, 외부 api호출, 데이터 가공) : service 역할
-// 카카오 api에 요청 보냄 -> 사용자 정보 파싱
+// 카카오 인증 위한 access token 발급 및 사용자 정보 조회, kakao user info dto 반환
 package com.randomtrip.backend.service;
 
 import com.randomtrip.backend.dto.KakaoUserInfo;
@@ -56,12 +56,24 @@ public class KakaoAuthService {
         ResponseEntity<Map> userInfoRes = restTemplate.exchange(
                 userInfoUri, HttpMethod.GET, infoRequest, Map.class);
 
-        Map<String, Object> kakaoAccount = (Map<String, Object>) userInfoRes.getBody().get("kakao_account");
+        Map<String, Object> body = userInfoRes.getBody();
+        Long id = Long.parseLong(body.get("id").toString());
+
+        Map<String, Object> kakaoAccount = (Map<String, Object>) body.get("kakao_account");
+        if (kakaoAccount == null) {
+            throw new RuntimeException("카카오 계정 정보가 존재하지 않습니다.");
+        }
+
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
+        if (profile == null || profile.get("nickname") == null) {
+            throw new RuntimeException("카카오 프로필 닉네임을 가져올 수 없습니다.");
+        }
+
+        String nickname = profile.get("nickname").toString();
 
         KakaoUserInfo userInfo = new KakaoUserInfo();
-        userInfo.setId(Long.parseLong(userInfoRes.getBody().get("id").toString()));
-        userInfo.setNickname((String) profile.get("nickname"));
+        userInfo.setId(id);
+        userInfo.setNickname(nickname);
 
         return userInfo;
     }
