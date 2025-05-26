@@ -2,7 +2,7 @@ name: Backend Deploy
 
 on:
   push:
-    branches: [ main ]  # main 브랜치에 push될 때마다 실행
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -18,10 +18,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+
       - name: Build with Gradle
         run: ./gradlew build
 
-      - name: Deploy to JCloud via SCP
+      - name: Upload JAR to JCloud
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.JCLOUD_HOST }}
