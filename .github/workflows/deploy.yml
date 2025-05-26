@@ -1,0 +1,32 @@
+name: Backend Deploy
+
+on:
+  push:
+    branches: [ main ]  # main 브랜치에 push될 때마다 실행
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      - name: Deploy to JCloud via SCP
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.JCLOUD_HOST }}
+          username: ubuntu
+          key: ${{ secrets.JCLOUD_SSH_KEY }}
+          port: 22
+          source: "./build/libs/backend-0.0.1-SNAPSHOT.jar"
+          target: "/home/ubuntu/app/"

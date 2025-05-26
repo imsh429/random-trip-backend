@@ -1,6 +1,10 @@
 package com.randomtrip.backend.service;
 
 import com.randomtrip.backend.dto.RandomTripResponse;
+import com.randomtrip.backend.dto.TripPlanRequest;
+import com.randomtrip.backend.dto.TripPlanResponse;
+import com.randomtrip.backend.dto.TripSpot;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
@@ -58,5 +62,26 @@ public class TripService {
         } catch (Exception e) {
             throw new RuntimeException("CSV 파일 로딩 실패: " + e.getMessage());
         }
+    }
+
+    public TripPlanResponse getPlannedRoute(TripPlanRequest request) {
+        String mood = request.getMood();
+        String region = request.getRegion();
+
+        // 🔥 실제 GPT 응답 대신 MOCK 데이터 사용 (위도/경도는 임시)
+        // TODO : 나중에 gpt응답 입히기
+        List<TripSpot> route = new ArrayList<>();
+
+        if (region.equals("장성군") && mood.equals("healing")) {
+            route.add(new TripSpot("장성호 수변길", 35.3083, 126.7871));
+            route.add(new TripSpot("백양사", 35.4301, 126.8347));
+            route.add(new TripSpot("장성 편백나무숲", 35.3123, 126.7689));
+        } else {
+            // 기본 응답
+            route.add(new TripSpot("로컬 명소 1", 35.0, 126.7));
+            route.add(new TripSpot("로컬 명소 2", 35.1, 126.8));
+        }
+
+        return new TripPlanResponse(route);
     }
 }

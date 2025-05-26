@@ -35,6 +35,7 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .requestMatchers("/oauth/**",
                                                                 "/trip/random",
+                                                                "/trip/plan",
                                                                 "/swagger-ui.html",
                                                                 "/swagger-ui/**",
                                                                 "/v3/api-docs/**")
