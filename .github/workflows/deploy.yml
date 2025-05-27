@@ -33,3 +33,15 @@ jobs:
           port: 19072
           source: "./build/libs/backend-0.0.1-SNAPSHOT.jar"
           target: "/home/ubuntu/app/"
+
+      - name: Run backend on JCloud with SSH tunnel
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.JCLOUD_HOST }}
+          username: ubuntu
+          key: ${{ secrets.JCLOUD_SSH_KEY }}
+          port: 19072
+          script: |
+            pkill -f 'backend-0.0.1-SNAPSHOT.jar' || true  # 기존 프로세스 종료
+            nohup ssh -f -N -L 3306:127.0.0.1:3306 ubuntu@113.198.66.75 -p 19072 > /dev/null 2>&1 &
+            nohup java -jar /home/ubuntu/app/backend-0.0.1-SNAPSHOT.jar > /home/ubuntu/app/log.txt 2>&1 &

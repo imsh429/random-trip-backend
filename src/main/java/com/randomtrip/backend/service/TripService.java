@@ -71,9 +71,9 @@ public class TripService {
         String region = request.getRegion();
 
         // GPT로부터 추천 장소 이름 리스트를 받아옴
-        List<String> spotNames = gptService.getRecommendedSpots(region, mood);
+        List<String> spotNames = gptService.getPlaceAndAddressList(region, mood);
 
-        // TODO : 위경도는 임시값 (후에 Naver Geocoding API로 대체)
+        // TODO : 위경도는 임시값 (나중에 kakao maps api이용해 대체)
         List<TripSpot> route = new ArrayList<>();
         double baseLat = 35.3;
         double baseLng = 126.8;

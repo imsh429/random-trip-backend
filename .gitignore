@@ -4,6 +4,8 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
+### 나중에 문제생기면 지우기 ###
+src/main/resources/application.yml
 
 ### STS ###
 .apt_generated
