@@ -20,6 +20,8 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class TripService {
 
+    private final GPTService gptService;
+
     public RandomTripResponse getRandomTrip() {
         List<RandomTripResponse> trips = new ArrayList<>();
 
@@ -68,18 +70,19 @@ public class TripService {
         String mood = request.getMood();
         String region = request.getRegion();
 
-        // 🔥 실제 GPT 응답 대신 MOCK 데이터 사용 (위도/경도는 임시)
-        // TODO : 나중에 gpt응답 입히기
-        List<TripSpot> route = new ArrayList<>();
+        // GPT로부터 추천 장소 이름 리스트를 받아옴
+        List<String> spotNames = gptService.getRecommendedSpots(region, mood);
 
-        if (region.equals("장성군") && mood.equals("healing")) {
-            route.add(new TripSpot("장성호 수변길", 35.3083, 126.7871));
-            route.add(new TripSpot("백양사", 35.4301, 126.8347));
-            route.add(new TripSpot("장성 편백나무숲", 35.3123, 126.7689));
-        } else {
-            // 기본 응답
-            route.add(new TripSpot("로컬 명소 1", 35.0, 126.7));
-            route.add(new TripSpot("로컬 명소 2", 35.1, 126.8));
+        // TODO : 위경도는 임시값 (후에 Naver Geocoding API로 대체)
+        List<TripSpot> route = new ArrayList<>();
+        double baseLat = 35.3;
+        double baseLng = 126.8;
+
+        for (int i = 0; i < spotNames.size(); i++) {
+            String name = spotNames.get(i);
+            double lat = baseLat + i * 0.01;
+            double lng = baseLng + i * 0.01;
+            route.add(new TripSpot(name, lat, lng));
         }
 
         return new TripPlanResponse(route);
