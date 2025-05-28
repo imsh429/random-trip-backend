@@ -52,11 +52,12 @@ jobs:
           key: ${{ secrets.JCLOUD_SSH_KEY }}
           port: 19072
           script: |
-            echo "[✅] 이전 프로세스 종료"
-            pkill -f 'backend.jar' || echo "기존 실행 없음"
+            sh -c '
+              echo "[✅] 이전 프로세스 종료"
+              pkill -f "backend.jar" || echo "기존 실행 없음"
 
-            echo "[🚀] 애플리케이션 실행"
-            cd /home/ubuntu/app
-            nohup java -jar backend.jar --spring.profiles.active=prod > app.log 2>&1 &
-            echo "[📄] 최근 로그"
-            tail -n 10 app.log || echo "로그 없음"
+              echo "[🚀] 새 JAR 실행"
+              cd /home/ubuntu/app
+              nohup java -jar backend.jar --spring.profiles.active=prod > app.log 2>&1 &
+              echo "[✅] 실행 완료"
+            '
