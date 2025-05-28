@@ -30,6 +30,10 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x ./gradlew
 
+      - name: Create application-prod.yml from secrets
+        run: |
+          echo "${{ secrets.APP_PROD_YML }}" > src/main/resources/application-prod.yml
+
       # 5. Build without tests
       - name: Build with Gradle
         run: ./gradlew clean build -x test
