@@ -42,5 +42,13 @@ jobs:
           key: ${{ secrets.JCLOUD_SSH_KEY }}
           port: 19072
           script: |
-            pkill -f 'backend-0.0.1-SNAPSHOT.jar' || true
-            nohup java -jar /home/ubuntu/app/backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod > /home/ubuntu/app/app.log 2>&1 &
+            echo "[✅] 기존 프로세스 종료"
+            pkill -f 'backend-0.0.1-SNAPSHOT.jar' || echo "실행 중인 프로세스 없음"
+
+            echo "[🚀] 새 JAR 실행"
+            cd /home/ubuntu/app
+            nohup java -jar backend-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod > app.log 2>&1 &
+            disown
+
+            echo "[📄] 실행 로그 최근 10줄"
+            tail -n 10 /home/ubuntu/app/app.log || echo "로그 없음"
