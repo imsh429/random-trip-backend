@@ -68,4 +68,4 @@ jobs:
             tmux new-session -d -s backend "java -jar backend.jar --spring.profiles.active=prod >> app.log 2>&1"
 
             echo "[📄] 최근 로그 출력 (20줄)"
-            tail -n 20 app.log || echo "로그 없음"
+            tail -n 20 app.log || echo "로그 .없음"
