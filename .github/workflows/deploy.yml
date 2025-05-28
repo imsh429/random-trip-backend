@@ -9,70 +9,52 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. GitHub 코드 체크아웃
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Github Repository 파일 불러오기
+        uses: actions/checkout@v4
 
-      # 2. JDK 설치
-      - name: Set up JDK
-        uses: actions/setup-java@v3
+      - name: JDK 17버전 설치
+        uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # ✅ 3. GitHub Secret에서 application-prod.yml 생성
-      - name: Create application-prod.yml from secret
-        run: |
-          mkdir -p src/main/resources
-          echo "${{ secrets.APPLICATION_PROD_YML }}" > src/main/resources/application-prod.yml
+      - name: application.yml 파일 만들기
+        run: echo "${{ secrets.APPLICATION_PROPERTIES }}" > ./src/main/resources/application.yml
 
-      # 4. Gradle 실행 권한 부여
-      - name: Grant execute permission to gradlew
+      - name: Gradle 실행 권한 부여
         run: chmod +x ./gradlew
 
-      - name: Create application-prod.yml from secrets
-        run: |
-          echo "${{ secrets.APPLICATION_PROD_YML }}" > src/main/resources/application-prod.yml
+      - name: 테스트 및 빌드하기
+        run: ./gradlew clean build
 
-      # 5. Build without tests
-      - name: Build with Gradle
-        run: ./gradlew clean build -x test
+      - name: 빌드된 파일 이름 변경하기
+        run: mv ./build/libs/backend-0.0.1-SNAPSHOT.jar ./project.jar
 
-      # 6. Upload JAR to JCloud
-      - name: Upload JAR to JCloud
-        uses: appleboy/scp-action@v0.1.4
+      - name: 빌드된 jar파일 업로드하기
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.JCLOUD_HOST }}
           username: ubuntu
           key: ${{ secrets.JCLOUD_SSH_KEY }}
           port: 19072
-          source: "./build/libs/backend-0.0.1-SNAPSHOT.jar"
+          source: project.jar
           target: "/home/ubuntu/app/"
 
-      # ✅ 7. SSH로 접속해 tmux로 Spring Boot 실행
-      - name: Run Spring Boot on JCloud with tmux
-        uses: appleboy/ssh-action@v1.0.0
+      - name: SSH로 접속하여 springboot 실행
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.JCLOUD_HOST }}
           username: ubuntu
           key: ${{ secrets.JCLOUD_SSH_KEY }}
           port: 19072
+          script_stop: true
           script: |
-            echo "[🧹] 기존 프로세스 종료"
-            pkill -f "backend.jar" || echo "기존 실행 없음"
+            echo "[🧹] 이전 앱 디렉토리 정리 및 생성"
+            rm -rf /home/ubuntu/app/current
+            mkdir /home/ubuntu/app/current
+            mv /home/ubuntu/app/project.jar /home/ubuntu/app/current/project.jar
 
-            echo "[📦] tmux 설치"
-            sudo apt-get update -y && sudo apt-get install -y tmux
-
-            echo "[📁] 디렉토리 이동 및 jar 이름 변경"
-            cd /home/ubuntu/app
-            mv backend-0.0.1-SNAPSHOT.jar backend.jar
-
-            echo "[🧨] 이전 tmux 세션 종료"
-            tmux kill-session -t backend || echo "기존 세션 없음"
-
-            echo "[🚀] 새 tmux 세션으로 백그라운드 실행"
-            tmux new-session -d -s backend "java -jar backend.jar --spring.profiles.active=prod >> app.log 2>&1"
-
-            echo "[📄] 최근 로그 출력 (20줄)"
-            tail -n 20 app.log || echo "로그 없음"
+            echo "[⚙️] Spring Boot 실행 준비"
+            cd /home/ubuntu/app/current
+            sudo fuser -k -n tcp 8080 || true
+            nohup java -jar project.jar --spring.profiles.active=prod > output.log 2>&1 &
