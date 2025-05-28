@@ -32,7 +32,7 @@ jobs:
 
       - name: Create application-prod.yml from secrets
         run: |
-          echo "${{ secrets.APP_PROD_YML }}" > src/main/resources/application-prod.yml
+          echo "${{ secrets.APPLICATION_PROD_YML }}" > src/main/resources/application-prod.yml
 
       # 5. Build without tests
       - name: Build with Gradle
