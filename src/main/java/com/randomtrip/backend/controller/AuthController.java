@@ -16,6 +16,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/oauth")
 @RequiredArgsConstructor
+// TODO : 배포된 프론트 주소로 바꾸기
 @CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 

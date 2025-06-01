@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/trip")
 @RequiredArgsConstructor
+// TODO : 배포된 프론트 주소로 바꾸기
 @CrossOrigin(origins = "http://localhost:5173")
 public class TripController {
 
