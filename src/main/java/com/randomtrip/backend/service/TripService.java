@@ -67,24 +67,7 @@ public class TripService {
     }
 
     public TripPlanResponse getPlannedRoute(TripPlanRequest request) {
-        String mood = request.getMood();
-        String region = request.getRegion();
-
-        // GPT로부터 추천 장소 이름 리스트를 받아옴
-        List<String> spotNames = gptService.getPlaceAndAddressList(region, mood);
-
-        // TODO : 위경도는 임시값 (나중에 kakao maps api이용해 대체)
-        List<TripSpot> route = new ArrayList<>();
-        double baseLat = 35.3;
-        double baseLng = 126.8;
-
-        for (int i = 0; i < spotNames.size(); i++) {
-            String name = spotNames.get(i);
-            double lat = baseLat + i * 0.01;
-            double lng = baseLng + i * 0.01;
-            route.add(new TripSpot(name, lat, lng));
-        }
-
+        List<TripSpot> route = gptService.getRecommendedSpots(request.getRegion(), request.getMood());
         return new TripPlanResponse(route);
     }
 }
