@@ -1,9 +1,11 @@
 package com.randomtrip.backend.service;
 
-import com.randomtrip.backend.dto.RandomTripResponse;
-import com.randomtrip.backend.dto.TripPlanRequest;
-import com.randomtrip.backend.dto.TripPlanResponse;
-import com.randomtrip.backend.dto.TripSpot;
+import com.randomtrip.backend.dto.*;
+import com.randomtrip.backend.entity.*;
+import com.randomtrip.backend.external.KakaoMobilityService;
+import com.randomtrip.backend.repository.ConfirmedPlaceRepository;
+import com.randomtrip.backend.repository.TripRepository;
+import com.randomtrip.backend.repository.TripRouteRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -20,8 +23,13 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class TripService {
 
+    private final TripRepository tripRepository;
+    private final ConfirmedPlaceRepository placeRepository;
+    private final KakaoMobilityService kakaoMobilityService;
     private final GPTService gptService;
+    private final TripRouteRepository routeRepository;
 
+    // 무작위 여행지 추천
     public RandomTripResponse getRandomTrip() {
         List<RandomTripResponse> trips = new ArrayList<>();
 
@@ -34,7 +42,7 @@ public class TripService {
             while ((line = reader.readLine()) != null) {
                 if (skipFirst) {
                     skipFirst = false;
-                    continue; // skip header
+                    continue;
                 }
 
                 String[] tokens = line.split(",");
@@ -47,7 +55,7 @@ public class TripService {
 
                         trips.add(new RandomTripResponse(korName, engName, latitude, longitude));
                     } catch (NumberFormatException e) {
-                        System.err.println("⚠️ 숫자 변환 오류 발생 → 스킵됨: " + line);
+                        System.err.println("⚠️ 숫자 변환 오류 → 스킵됨: " + line);
                     }
                 } else {
                     System.err.println("⚠️ CSV 필드 수 부족 → 스킵됨: " + line);
@@ -66,8 +74,42 @@ public class TripService {
         }
     }
 
+    // GPT 기반 추천 경로
     public TripPlanResponse getPlannedRoute(TripPlanRequest request) {
         List<TripSpot> route = gptService.getRecommendedSpots(request.getRegion(), request.getMood());
         return new TripPlanResponse(route);
     }
+
+    public RouteResponse handleTripConfirmation(TripRequest request, Long userId) {
+        // 1. Kakao Mobility API 호출
+        RouteResponse route = kakaoMobilityService.getOptimizedRoute(request);
+
+        // 2. Trip 저장
+        Trip trip = tripRepository.save(Trip.builder()
+                .userId(userId)
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        // 3. 출발지 제외한 장소 저장
+        List<SpotDTO> spots = request.getSpots();
+        for (SpotDTO spot : spots) {
+            ConfirmedPlace place = ConfirmedPlace.builder()
+                    .trip(trip)
+                    .name(spot.getName())
+                    .lat(spot.getLat())
+                    .lng(spot.getLng())
+                    .build();
+            placeRepository.save(place);
+        }
+
+        List<LatLngPoint> polyline = route.getPolyline();
+        // 4. TripRoute 저장 (polyline)
+        for (int i = 0; i < polyline.size(); i++) {
+            TripRoute routePoint = polyline.get(i).toEntity(trip, i);
+            routeRepository.save(routePoint);
+        }
+        // 5. 프론트에 polyline 응답
+        return route;
+    }
+
 }
