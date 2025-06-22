@@ -56,22 +56,24 @@ public class KakaoMobilityService {
         destinationMap.put("x", destination.getLng());
         destinationMap.put("y", destination.getLat());
 
-        // 중간 경유지: 마지막을 제외한 spot들
-        List<Map<String, Object>> waypoints = new ArrayList<>();
-        for (int i = 0; i < spots.size() - 1; i++) {
-            SpotDTO s = spots.get(i);
-            Map<String, Object> point = new HashMap<>();
-            point.put("name", s.getName());
-            point.put("x", s.getLng());
-            point.put("y", s.getLat());
-            waypoints.add(point);
-        }
-
         Map<String, Object> body = new HashMap<>();
         body.put("origin", originMap);
         body.put("destination", destinationMap);
-        body.put("waypoints", waypoints);
         body.put("priority", "RECOMMEND");
+
+        // 경유지가 2개 이상일 때만 waypoints 추가
+        if (spots.size() > 1) {
+            List<Map<String, Object>> waypoints = new ArrayList<>();
+            for (int i = 0; i < spots.size() - 1; i++) {
+                SpotDTO s = spots.get(i);
+                Map<String, Object> point = new HashMap<>();
+                point.put("name", s.getName());
+                point.put("x", s.getLng());
+                point.put("y", s.getLat());
+                waypoints.add(point);
+            }
+            body.put("waypoints", waypoints);
+        }
 
         return body;
     }
