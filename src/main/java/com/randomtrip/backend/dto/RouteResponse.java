@@ -11,4 +11,5 @@ import java.util.List;
 @Builder
 public class RouteResponse {
     private List<LatLngPoint> polyline;
+    private List<SectionInfo> sections;
 }

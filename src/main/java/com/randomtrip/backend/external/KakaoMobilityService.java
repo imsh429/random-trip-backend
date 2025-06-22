@@ -67,12 +67,11 @@ public class KakaoMobilityService {
             waypoints.add(point);
         }
 
-        // 요청 본문 구성
         Map<String, Object> body = new HashMap<>();
         body.put("origin", originMap);
         body.put("destination", destinationMap);
         body.put("waypoints", waypoints);
-        body.put("priority", "RECOMMEND"); // 경로 우선순위 옵션
+        body.put("priority", "RECOMMEND");
 
         return body;
     }
@@ -87,24 +86,50 @@ public class KakaoMobilityService {
             }
 
             List<LatLngPoint> polyline = new ArrayList<>();
+            List<SectionInfo> sectionInfos = new ArrayList<>();
 
             JsonNode sections = routes.get(0).path("sections");
-            for (JsonNode section : sections) {
+
+            for (int sectionIndex = 0; sectionIndex < sections.size(); sectionIndex++) {
+                JsonNode section = sections.get(sectionIndex);
+                int distance = section.path("distance").asInt();
+                int duration = section.path("duration").asInt();
+
+                List<String> roadNames = new ArrayList<>();
                 JsonNode roads = section.path("roads");
+
                 for (JsonNode road : roads) {
+                    String roadName = road.path("name").asText();
+                    if (!roadName.isEmpty()) {
+                        roadNames.add(roadName);
+                    }
+
                     JsonNode vertexes = road.path("vertexes");
                     for (int i = 0; i < vertexes.size(); i += 2) {
                         double lng = vertexes.get(i).asDouble();
                         double lat = vertexes.get(i + 1).asDouble();
-                        polyline.add(new LatLngPoint(lat, lng)); // 순서: lat, lng
+
+                        LatLngPoint point = LatLngPoint.builder()
+                                .lat(lat)
+                                .lng(lng)
+                                .sectionId(sectionIndex)
+                                .roadName(roadName)
+                                .distance(distance)
+                                .duration(duration)
+                                .build();
+
+                        polyline.add(point);
                     }
                 }
+
+                sectionInfos.add(new SectionInfo(distance, duration, roadNames));
             }
 
-            return new RouteResponse(polyline);
+            return new RouteResponse(polyline, sectionInfos);
 
         } catch (Exception e) {
             throw new RuntimeException("Kakao 경로 응답 파싱 실패", e);
         }
     }
+
 }

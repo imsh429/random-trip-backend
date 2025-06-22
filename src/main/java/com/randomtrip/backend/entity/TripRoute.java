@@ -23,4 +23,9 @@ public class TripRoute {
 
     private int sequence; // 경로 순서를 보장하기 위한 인덱스
 
+    private int sectionId;
+    private String roadName;
+    private int distance; // meters
+    private int duration; // seconds
+
 }
