@@ -80,17 +80,25 @@ public class KakaoMobilityService {
     private RouteResponse parseRouteResponse(String json) {
         try {
             JsonNode root = objectMapper.readTree(json);
-            JsonNode vertexes = root
-                    .path("routes").get(0)
-                    .path("sections").get(0)
-                    .path("roads").get(0)
-                    .path("vertexes");
+            JsonNode routes = root.path("routes");
+
+            if (routes.isEmpty()) {
+                throw new RuntimeException("경로 정보가 없습니다.");
+            }
 
             List<LatLngPoint> polyline = new ArrayList<>();
-            for (int i = 0; i < vertexes.size(); i += 2) {
-                double lng = vertexes.get(i).asDouble();
-                double lat = vertexes.get(i + 1).asDouble();
-                polyline.add(new LatLngPoint(lat, lng)); // lat, lng 순서
+
+            JsonNode sections = routes.get(0).path("sections");
+            for (JsonNode section : sections) {
+                JsonNode roads = section.path("roads");
+                for (JsonNode road : roads) {
+                    JsonNode vertexes = road.path("vertexes");
+                    for (int i = 0; i < vertexes.size(); i += 2) {
+                        double lng = vertexes.get(i).asDouble();
+                        double lat = vertexes.get(i + 1).asDouble();
+                        polyline.add(new LatLngPoint(lat, lng)); // 순서: lat, lng
+                    }
+                }
             }
 
             return new RouteResponse(polyline);
