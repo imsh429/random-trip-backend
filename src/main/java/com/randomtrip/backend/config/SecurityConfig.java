@@ -37,6 +37,7 @@ public class SecurityConfig {
                                                                 "/trip/random",
                                                                 "/trip/plan",
                                                                 "/trip/confirm",
+                                                                "/trip/my",
                                                                 "/swagger-ui.html",
                                                                 "/swagger-ui/**",
                                                                 "/v3/api-docs/**")

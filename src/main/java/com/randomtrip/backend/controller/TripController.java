@@ -3,6 +3,10 @@ package com.randomtrip.backend.controller;
 import com.randomtrip.backend.dto.*;
 import com.randomtrip.backend.service.TripService;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -36,5 +40,15 @@ public class TripController {
         Long userId = user.getId(); // JWT에서 추출된 인증된 사용자 ID
         RouteResponse routeResponse = tripService.handleTripConfirmation(request, userId);
         return ResponseEntity.ok(routeResponse);
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyRecentTrips(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            return ResponseEntity.status(401).body("Unauthorized");
+        }
+
+        List<Map<String, Object>> recentTrips = tripService.getRecentTrips(user.getId());
+        return ResponseEntity.ok(Map.of("spots", recentTrips));
     }
 }

@@ -9,14 +9,18 @@ import com.randomtrip.backend.repository.TripRouteRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 @Service
@@ -110,6 +114,29 @@ public class TripService {
         }
         // 5. 프론트에 polyline 응답
         return route;
+    }
+
+    private final ConfirmedPlaceRepository confirmedPlaceRepository;
+
+    public List<Map<String, Object>> getRecentTrips(Long userId) {
+        List<ConfirmedPlace> places = confirmedPlaceRepository.findRecentByUserId(userId, PageRequest.of(0, 5));
+
+        List<Map<String, Object>> result = new ArrayList<>();
+
+        for (ConfirmedPlace place : places) {
+            Map<String, Object> placeMap = new HashMap<>();
+            placeMap.put("id", place.getId());
+            placeMap.put("name", place.getName());
+
+            String formattedDate = place.getTrip().getCreatedAt()
+                    .toLocalDate()
+                    .format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+            placeMap.put("date", formattedDate);
+
+            result.add(placeMap);
+        }
+
+        return result;
     }
 
 }
