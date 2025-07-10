@@ -25,7 +25,7 @@
 
 
 ## 📂 주요 폴더 구조
-
+```
 src/
 src/main/java/com/randomtrip/backend/
 ├── config/         # 보안, CORS, JWT, OAuth2 등 설정 클래스
@@ -37,7 +37,7 @@ src/main/java/com/randomtrip/backend/
 ├── service/        # 핵심 비즈니스 로직 처리
 ├── util/           # 공통 유틸 함수 및 상수
 └── RandomTripBackendApplication.java  # Spring Boot 진입점
-
+```
 
 ---
 
