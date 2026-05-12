@@ -1,4 +1,4 @@
-# 🚗 랜덤여행생성기 Backend
+# 🚗 랜덤 여행지 추천 서비스 Backend
 
 **"여행지 추천부터 최적 경로 생성까지. GPT와 Kakao API를 연동한 Spring Boot 기반 여행 추천 백엔드 시스템입니다."**
 
